@@ -1,37 +1,43 @@
 <head>
-  <title>simple</title>
+  <title>Leaderboards</title>
 </head>
 
 <body>
     <header>
         <nav class="teal">
             <div class="nav-wrapper" style="margin-left:20px; margin-right: 20px;">
-                <a href="#" class="brand-logo">Logo</a>
+                <a href="#" class="brand-logo">Leaderboards</a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a href="#">Sass</a></li>
+                    <!--<li><a href="#">Sass</a></li>
                     <li><a href="#">Components</a></li>
-                    <li><a href="#">JavaScript</a></li>
+                    <li><a href="#">JavaScript</a></li>-->
+                    <li><a href="#">Sign In</a></li>
                 </ul>
             </div>
         </nav>
     </header>
 
     <main>
-        <div id="content" style="text-align:center;">
-            <h1>Welcome to Meteor!</h1>
+        <div id="content">
             <div class="row">
-                <div class="col s4 offset-s4 m4 offset-m4">
-                    <div  class="card" style="text-align:center; padding-top: 25px; padding-bottom: 5px;">
-                        {{> hello}}
+                <form class="col s6 offset-s3 m6 offset-m3" style="text-align:center;">
+                    <h3>Create leaderboard</h3>
+                    <div class="row">
+                        <div class="col s9">
+                            <input placeholder="Leaderboard Name" id="leaderboard_name" type="text" class="validate">
+                        </div>
+                        <div class="col s3">
+                            <a class="waves-effect btn">CREATE</a>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-            {{> info}}
+            {{> leaderboard}}
         </div>
     </main>
 
     <footer class="page-footer teal">
-        <div class="container">
+        <!--<div class="container">
             <div class="row">
                 <div class="col l6 s12">
                     <h5 class="white-text">Footer Content</h5>
@@ -46,7 +52,7 @@
                     </ul>
                 </div>
             </div>
-        </div>
+        </div>-->
         <div class="footer-copyright">
             <div class="container">
                 © 2016 Copyright Text
@@ -56,17 +62,35 @@
     </footer>
 </body>
 
-<template name="hello">
-    <a id="btnClickMe" class="waves-effect btn teal">CLICK ME</a>
-    <p>You've pressed the button {{counter}} times.</p>
-</template>
 
-<template name="info">
-    <h2>Learn Meteor!</h2>
-    <ul>
-        <li><a href="https://www.meteor.com/try">Do the Tutorial</a></li>
-        <li><a href="http://guide.meteor.com">Follow the Guide</a></li>
-        <li><a href="https://docs.meteor.com">Read the Docs</a></li>
-        <li><a href="https://forums.meteor.com">Discussions</a></li>
-    </ul>
+<template name="leaderboard">
+    <div class="row">
+        <div class="col s6 offset-s3 m6 offset-m3">
+            <div  class="card teal" style="padding-top: 5px;">
+                <h5 style="text-align:center;color:white;">Title</h5>
+                <ul class="collection">
+                    <li class="collection-item">
+                        1 - Rick
+                        <div style="float:right">100</div>
+                    </li>
+                    <li class="collection-item">
+                        2 - Daryl
+                        <div style="float:right">86</div>
+                    </li>
+                    <li class="collection-item">
+                        3 - Michonne
+                        <div style="float:right">75</div>
+                    </li>
+                    <li class="collection-item">
+                        4 - Maggie
+                        <div style="float:right">47</div>
+                    </li>
+                    <li class="collection-item">
+                        5 - Glenn
+                        <div style="float:right">29</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </template>
