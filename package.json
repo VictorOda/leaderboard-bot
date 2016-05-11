@@ -1,10 +1,13 @@
 {
-  "name": "leaderboard-bot",
-  "private": true,
-  "scripts": {
-    "start": "meteor run"
-  },
-  "dependencies": {
-    "meteor-node-stubs": "~0.2.0"
-  }
+    "name": "leaderboard-bot",
+    "private": true,
+    "scripts": {
+        "start": "meteor run"
+    },
+    "dependencies": {
+        "meteor-node-stubs": "~0.2.0"
+    },
+    "jshintConfig": {
+        "esversion": 6
+    }
 }
