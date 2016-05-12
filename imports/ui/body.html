@@ -70,26 +70,6 @@
                     {{#each players}}
                         {{> player}}
                     {{/each}}
-                    <!-- <li class="collection-item">
-                        1 - Rick
-                        <div style="float:right">100</div>
-                    </li>
-                    <li class="collection-item">
-                        2 - Daryl
-                        <div style="float:right">86</div>
-                    </li>
-                    <li class="collection-item">
-                        3 - Michonne
-                        <div style="float:right">75</div>
-                    </li>
-                    <li class="collection-item">
-                        4 - Maggie
-                        <div style="float:right">47</div>
-                    </li>
-                    <li class="collection-item">
-                        5 - Glenn
-                        <div style="float:right">29</div>
-                    </li> -->
                 </ul>
             </div>
             <form id="new-player">
@@ -108,8 +88,16 @@
 </template>
 
 <template name="player">
-    <li class="collection-item">
-        {{name}}
-        <div style="float:right">{{score}}</div>
-    </li>
+    {{#if isActive}}
+        <li class="collection-item active">
+            {{name}}
+            <div style="float:right">{{score}}</div>
+        </li>
+    {{else}}
+        <li class="collection-item">
+            {{name}}
+            <div style="float:right">{{score}}</div>
+        </li>
+    {{/if}}
+
 </template>

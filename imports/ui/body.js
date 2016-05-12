@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 
@@ -18,6 +19,12 @@ Template.leaderboard.helpers({
     },
 });
 
+Template.player.helpers({
+    isActive() {
+        return this.status === "active";
+    },
+});
+
 Template.body.events({
     'submit #new-leaderboard'(e) {
         // Prevent default browser form submit
@@ -27,7 +34,7 @@ Template.body.events({
         const target = e.target;
         const title = target.text.value;
 
-        // Insert a task into the collection
+        // Insert a leaderboard into the collection
         Leaderboards.insert({
             title,
             createdAt: new Date(), // current time
@@ -47,14 +54,29 @@ Template.leaderboard.events({
         const target = e.target;
         const name = target.text.value;
 
-        // Insert a task into the collection
+        // Insert a player into a leaderboard
         Players.insert({
             name,
             score: 0,
-            leaderboard: this._id, // current time
+            leaderboard: this._id, // Leaderboard of the player
+            status: "", // Status of the player
         });
 
         // Clear form
         target.text.value = '';
+    },
+});
+
+Template.player.events({
+    'click li'(e) {
+        // Prevent default browser form submit
+        e.preventDefault();
+        // Reset all the players of the leaderboard
+        Meteor.call('resetActivePlayers', this.leaderboard);
+        console.log(Players.find({leaderboard: this.leaderboard}).fetch());
+        // Set this one as active
+        Players.update(this._id, {$set:{
+            status: "active"
+        }});
     },
 });
