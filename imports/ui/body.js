@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
+import { Session } from 'meteor/session';
 
 import { Leaderboards } from '../api/leaderboards.js';
 import { Players } from '../api/players.js';
@@ -21,13 +22,12 @@ Template.leaderboard.helpers({
 
 Template.player.helpers({
     isActive() {
-        return this.status === "active";
+        return this._id === Session.get('selectedPlayer-' + this.leaderboard);
     },
 });
 
 Template.body.events({
     'submit #new-leaderboard'(e) {
-        // Prevent default browser form submit
         e.preventDefault();
 
         // Get value from form element
@@ -47,7 +47,6 @@ Template.body.events({
 
 Template.leaderboard.events({
     'submit #new-player'(e) {
-        // Prevent default browser form submit
         e.preventDefault();
 
         // Get value from form element
@@ -59,7 +58,6 @@ Template.leaderboard.events({
             name,
             score: 0,
             leaderboard: this._id, // Leaderboard of the player
-            status: "", // Status of the player
         });
 
         // Clear form
@@ -69,14 +67,14 @@ Template.leaderboard.events({
 
 Template.player.events({
     'click li'(e) {
-        // Prevent default browser form submit
         e.preventDefault();
-        // Reset all the players of the leaderboard
-        Meteor.call('resetActivePlayers', this.leaderboard);
-        console.log(Players.find({leaderboard: this.leaderboard}).fetch());
-        // Set this one as active
-        Players.update(this._id, {$set:{
-            status: "active"
-        }});
+
+        if(this._id === Session.get('selectedPlayer-' + this.leaderboard)) {
+            // If player is already active
+            Session.set('selectedPlayer-' + this.leaderboard, '');
+        } else {
+            //Set the player as the active one for it's respective leaderboard
+            Session.set('selectedPlayer-' + this.leaderboard, this._id);
+        }
     },
 });
