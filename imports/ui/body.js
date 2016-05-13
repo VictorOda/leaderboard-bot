@@ -18,6 +18,13 @@ Template.leaderboard.helpers({
     players() {
         return Players.find({leaderboard: this._id});
     },
+    isActive() {
+        const status = Session.get('selectedPlayer-' + this._id);
+        if(status === undefined)
+            Session.set('selectedPlayer-' + this._id, '');
+
+        return status !== '';
+    },
 });
 
 Template.player.helpers({

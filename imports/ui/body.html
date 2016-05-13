@@ -82,8 +82,24 @@
                     </div>
                 </div>
             </form>
-
         </div>
+        {{#if isActive}}
+        <div class="col s3  m3">
+            <div  class="card" style="text-align:center;padding:10px;">
+                <div class="row">
+                    <a class="waves-effect btn red">REMOVE</a>
+                </div>
+                <div class="divider" style="margin-bottom:20px;"></div>
+                <div class="row">
+                    <a class="btn red col s3 m3">-</a>
+                    <div class="col s6 m6">
+                        <input name="text" placeholder="Points" type="text" class="validate">
+                    </div>
+                    <a class="btn green col s3 m3">+</a>
+                </div>
+            </div>
+        </div>
+        {{/if}}
     </div>
 </template>
 
