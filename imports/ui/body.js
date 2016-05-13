@@ -16,7 +16,7 @@ Template.body.helpers({
 
 Template.leaderboard.helpers({
     players() {
-        return Players.find({leaderboard: this._id});
+        return Players.find({leaderboard: this._id}, {sort: {score: -1}});
     },
     isActive() {
         const status = Session.get('selectedPlayer-' + this._id);
@@ -55,7 +55,7 @@ Template.body.events({
 Template.leaderboard.events({
     'submit #new-player'(e) {
         e.preventDefault();
-
+        
         // Get value from form element
         const target = e.target;
         const name = target.text.value;
@@ -69,6 +69,34 @@ Template.leaderboard.events({
 
         // Clear form
         target.text.value = '';
+    },
+    'click #minus'(e) {
+        e.preventDefault();
+
+        // Get value to update score
+        let points = Session.get('score-' + this._id);
+
+        // Update score
+        Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: -points}});
+    },
+    'click #plus'(e) {
+        e.preventDefault();
+
+        // Get value to update score
+        const points = parseInt(Session.get('score-' + this._id));
+
+
+        // Update score
+        Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: points}});
+    },
+    'click #remove'(e) {
+        e.preventDefault();
+
+        Players.remove(Session.get('selectedPlayer-' + this._id));
+    },
+    'input #points' (e) {
+        // Set points to change for selected player
+        Session.set('score-' + this._id, e.target.value);
     },
 });
 

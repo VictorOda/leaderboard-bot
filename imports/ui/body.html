@@ -23,7 +23,7 @@
                             <input name="text" placeholder="Leaderboard Name" type="text" class="validate">
                         </div>
                         <div class="col s3">
-                            <a class="waves-effect btn">CREATE</a>
+                            <button class="waves-effect btn" type="submit">CREATE</button>
                         </div>
                     </div>
                 </form>
@@ -78,7 +78,7 @@
                         <input name="text" placeholder="Player's Name" type="text" class="validate">
                     </div>
                     <div class="col s4">
-                        <a class="waves-effect btn">ADD PLAYER</a>
+                        <button class="waves-effect btn" type="submit">ADD PLAYER</button>
                     </div>
                 </div>
             </form>
@@ -86,16 +86,20 @@
         {{#if isActive}}
         <div class="col s3  m3">
             <div  class="card" style="text-align:center;padding:10px;">
-                <div class="row">
-                    <a class="waves-effect btn red">REMOVE</a>
+                <div class="row" style="margin-bottom:0px;">
+                    <h5>MENU</h5>
+                </div>
+                <div class="divider" style="margin-bottom:20px;"></div>
+                <div class="row" style="margi-bottom:0px;">
+                    <a id="minus" class="btn red col s3 m3">-</a>
+                    <div class="col s6 m6" style="margin-bottom:0px;">
+                        <input id="points" placeholder="Points" type="text">
+                    </div>
+                    <a id="plus" class="btn green col s3 m3">+</a>
                 </div>
                 <div class="divider" style="margin-bottom:20px;"></div>
                 <div class="row">
-                    <a class="btn red col s3 m3">-</a>
-                    <div class="col s6 m6">
-                        <input name="text" placeholder="Points" type="text" class="validate">
-                    </div>
-                    <a class="btn green col s3 m3">+</a>
+                    <a id="remove" class="waves-effect btn red">REMOVE</a>
                 </div>
             </div>
         </div>
