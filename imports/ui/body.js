@@ -2,6 +2,9 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Session } from 'meteor/session';
+import { check } from 'meteor/check';
+
+import { Bert } from 'meteor/themeteorchef:bert';
 
 import { Leaderboards } from '../api/leaderboards.js';
 import { Players } from '../api/players.js';
@@ -49,13 +52,15 @@ Template.body.events({
 
         // Clear form
         target.text.value = '';
+
+        Bert.alert('New leaderboard \'' + title + '\' created!', 'success', 'fixed-top', 'fa-check');
     },
 });
 
 Template.leaderboard.events({
     'submit #new-player'(e) {
         e.preventDefault();
-        
+
         // Get value from form element
         const target = e.target;
         const name = target.text.value;
@@ -69,12 +74,20 @@ Template.leaderboard.events({
 
         // Clear form
         target.text.value = '';
+
+        Bert.alert('New player \'' + name + '\' added!', 'success', 'fixed-top', 'fa-check');
     },
     'click #minus'(e) {
         e.preventDefault();
 
         // Get value to update score
-        let points = Session.get('score-' + this._id);
+        const points = parseInt(Session.get('score-' + this._id));
+        try {
+            check(points, Match.Integer);
+        } catch (err) {
+            Bert.alert('The value of points must be a number!', 'warning', 'fixed-top', 'fa-warning');
+            return;
+        }
 
         // Update score
         Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: -points}});
@@ -84,15 +97,24 @@ Template.leaderboard.events({
 
         // Get value to update score
         const points = parseInt(Session.get('score-' + this._id));
-
+        try {
+            check(points, Match.Integer);
+        } catch (err) {
+            Bert.alert('The value of points must be a number!', 'warning', 'fixed-top', 'fa-warning');
+            return;
+        }
 
         // Update score
         Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: points}});
     },
     'click #remove'(e) {
         e.preventDefault();
+        const player = Players.findOne(Session.get('selectedPlayer-' + this._id)); // Get player
+        Players.remove(Session.get('selectedPlayer-' + this._id)); // Remove player
 
-        Players.remove(Session.get('selectedPlayer-' + this._id));
+        Bert.alert('Player \'' + player.name + '\' removed!', 'success', 'fixed-top', 'fa-check');
+        // De-select player
+        Session.set('selectedPlayer-' + this._id, '');
     },
     'input #points' (e) {
         // Set points to change for selected player
