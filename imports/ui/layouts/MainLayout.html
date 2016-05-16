@@ -1,0 +1,33 @@
+<template name="MainLayout">
+    <body>
+        <header>
+            <nav class="teal">
+                <div class="nav-wrapper" style="margin-left:20px; margin-right: 20px;">
+                    <a href="#" class="brand-logo">Leaderboards</a>
+                    <ul id="nav-mobile" class="right hide-on-med-and-down">
+                        <!--<li><a href="#">Sass</a></li>
+                        <li><a href="#">Components</a></li>
+                        <li><a href="#">JavaScript</a></li>-->
+                        <li><a href="#">Sign In</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <div id="content">
+                {{> Template.dynamic template=main}}
+            </div>
+        </main>
+
+        <footer class="page-footer teal">
+            <div class="footer-copyright">
+                <div class="container">
+                    © 2016 Copyright Text
+                    <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+                </div>
+            </div>
+        </footer>
+    </body>
+
+</template>

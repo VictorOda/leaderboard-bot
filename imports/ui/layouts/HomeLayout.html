@@ -1,0 +1,80 @@
+<template name="HomeLayout">
+    <div class="row">
+        <form id="new-leaderboard" class="col s6 offset-s3 m6 offset-m3" style="text-align:center;">
+            <h3>Create leaderboard</h3>
+            <div class="row">
+                <div class="col s9">
+                    <input name="text" placeholder="Leaderboard Name" type="text" class="validate">
+                </div>
+                <div class="col s3">
+                    <button class="waves-effect btn" type="submit">CREATE</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{#each leaderboards}}
+        {{> leaderboard}}
+    {{/each}}
+</template>
+
+<template name="leaderboard">
+    <div class="row">
+        <div class="col s6 offset-s3 m6 offset-m3">
+            <div  class="card teal" style="padding-top: 5px;">
+                <h5 style="text-align:center;color:white;">{{title}}</h5>
+                <ul class="collection">
+                    {{#each players}}
+                        {{> player}}
+                    {{/each}}
+                </ul>
+            </div>
+            <form id="new-player">
+                <div class="row">
+                    <div class="col s8">
+                        <input name="text" placeholder="Player's Name" type="text" class="validate">
+                    </div>
+                    <div class="col s4">
+                        <button class="waves-effect btn" type="submit">ADD PLAYER</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {{#if isActive}}
+        <div class="col s3  m3">
+            <div  class="card" style="text-align:center;padding:10px;">
+                <div class="row" style="margin-bottom:0px;">
+                    <h5>MENU</h5>
+                </div>
+                <div class="divider" style="margin-bottom:20px;"></div>
+                <div class="row" style="margi-bottom:0px;">
+                    <a id="minus" class="btn red col s3 m3">-</a>
+                    <div class="col s6 m6" style="margin-bottom:0px;">
+                        <input id="points" placeholder="Points" type="text">
+                    </div>
+                    <a id="plus" class="btn green col s3 m3">+</a>
+                </div>
+                <div class="divider" style="margin-bottom:20px;"></div>
+                <div class="row">
+                    <a id="remove" class="waves-effect btn red">REMOVE</a>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</template>
+
+<template name="player">
+    {{#if isActive}}
+        <li class="collection-item active">
+            {{name}}
+            <div style="float:right">{{score}}</div>
+        </li>
+    {{else}}
+        <li class="collection-item">
+            {{name}}
+            <div style="float:right">{{score}}</div>
+        </li>
+    {{/if}}
+
+</template>
