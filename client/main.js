@@ -6,7 +6,6 @@ import { check } from 'meteor/check';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Accounts } from 'meteor/accounts-base';
 
-
 import { Bert } from 'meteor/themeteorchef:bert';
 
 import { Leaderboards } from '../imports/api/leaderboards.js';
@@ -162,7 +161,28 @@ Template.SignUpLayout.events({
                 }
             });
         } else {
-            Bert.alert('The passwords don\'t match!', 'danger', 'fixed-top', 'fa-remove');
+
         }
+    },
+});
+
+Template.LogInLayout.events({
+    'submit form'(e) {
+        e.preventDefault();
+
+        // Get values
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+
+        // Try to login
+        Meteor.loginWithPassword(email, password, (err) => {
+            if(err) {
+                Bert.alert(err.reason, 'danger', 'fixed-top', 'fa-remove');
+            } else {
+                console.log('success!');
+                Bert.alert('User successfully logged in!', 'success', 'fixed-top', 'fa-check');
+                FlowRouter.go('/');
+            }
+        });
     },
 });
