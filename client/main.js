@@ -3,6 +3,9 @@ import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { Session } from 'meteor/session';
 import { check } from 'meteor/check';
+import { FlowRouter } from 'meteor/kadira:flow-router';
+import { Accounts } from 'meteor/accounts-base';
+
 
 import { Bert } from 'meteor/themeteorchef:bert';
 
@@ -133,6 +136,33 @@ Template.player.events({
         } else {
             //Set the player as the active one for it's respective leaderboard
             Session.set('selectedPlayer-' + this.leaderboard, this._id);
+        }
+    },
+});
+
+Template.SignUpLayout.events({
+    'submit form'(e) {
+        e.preventDefault();
+
+        // Get values
+        const email = e.target.email.value;
+        const password = e.target.password.value;
+        const confirmPassword = e.target.confirmPassword.value;
+
+        // Check if passwords match
+        if(password === confirmPassword) {
+            Accounts.createUser({ email: email, password: password }, (err) => {
+                if (err) {
+                    console.log(err);
+                    Bert.alert(err.reason, 'danger', 'fixed-top', 'fa-remove');
+                } else {
+                    console.log('success!');
+                    Bert.alert('Account successfully created!', 'success', 'fixed-top', 'fa-check');
+                    FlowRouter.go('/');
+                }
+            });
+        } else {
+            Bert.alert('The passwords don\'t match!', 'danger', 'fixed-top', 'fa-remove');
         }
     },
 });
