@@ -14,6 +14,21 @@ import { Players } from '../imports/api/players.js';
 import '../imports/ui/layouts/MainLayout.html';
 import '../imports/ui/layouts/HomeLayout.html';
 
+Template.MainLayout.helpers({
+    isLoggedIn() {
+        return Meteor.userId();
+    },
+});
+
+Template.MainLayout.events({
+    'click #logout'(e) {
+        e.preventDefault();
+
+        Meteor.logout();
+        FlowRouter.go('/login');
+    }
+});
+
 Template.HomeLayout.helpers({
     leaderboards() {
         return Leaderboards.find({});
