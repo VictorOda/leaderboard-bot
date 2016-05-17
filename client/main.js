@@ -16,6 +16,9 @@ import '../imports/ui/layouts/HomeLayout.html';
 
 Template.MainLayout.helpers({
     isLoggedIn() {
+        if(!Meteor.userId()) {
+            FlowRouter.go('/login');
+        }
         return Meteor.userId();
     },
 });
@@ -31,7 +34,7 @@ Template.MainLayout.events({
 
 Template.HomeLayout.helpers({
     leaderboards() {
-        return Leaderboards.find({});
+        return Leaderboards.find({userId: Meteor.userId()});
     },
 });
 
@@ -66,6 +69,7 @@ Template.body.events({
         Leaderboards.insert({
             title,
             createdAt: new Date(), // current time
+            userId: Meteor.userId()
         });
 
         // Clear form
