@@ -49,6 +49,14 @@ Template.leaderboard.helpers({
 
         return status !== '';
     },
+    isEmpty() {
+        const players = Players.find({leaderboard: this._id}).fetch();
+        if(players.length > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    },
     leaderboardModal() {
         return this._id;
     },
