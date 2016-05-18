@@ -49,6 +49,9 @@ Template.leaderboard.helpers({
 
         return status !== '';
     },
+    leaderboardModal() {
+        return this._id;
+    },
 });
 
 Template.player.helpers({
@@ -141,6 +144,24 @@ Template.leaderboard.events({
     'input #points' (e) {
         // Set points to change for selected player
         Session.set('score-' + this._id, e.target.value);
+    },
+    'click #delete-leaderboard'(e) {
+        e.preventDefault();
+        $('#' + this._id).openModal();
+    },
+    'click #cancel-modal'(e) {
+        e.preventDefault();
+
+        $('#' + this._id).closeModal();
+    },
+    'click #delete-modal'(e) {
+        e.preventDefault();
+
+        const leaderboard = Leaderboards.findOne(this._id);
+        Bert.alert('Leaderboard \'' + leaderboard.title + '\' deleted!', 'success', 'fixed-top', 'fa-check');
+        Leaderboards.remove(this._id);
+
+        $('#' + this._id).closeModal();
     },
 });
 
