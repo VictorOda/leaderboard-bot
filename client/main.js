@@ -16,7 +16,7 @@ import '../imports/ui/layouts/HomeLayout.html';
 
 Template.MainLayout.helpers({
     isLoggedIn() {
-        if(!Meteor.userId()) {
+        if(!Meteor.userId() && FlowRouter.current().path === '/') {
             FlowRouter.go('/login');
         }
         return Meteor.userId();
