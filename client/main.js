@@ -32,9 +32,20 @@ Template.MainLayout.events({
     }
 });
 
+Template.HomeLayout.onCreated(() => {
+    Meteor.subscribe('leaderboards');
+    Meteor.subscribe('players');
+});
+
+Template.HomeLayout.onRendered(() => {
+    Leaderboards.find().map((leaderboard) => {
+        console.log(leaderboard);
+    });
+});
+
 Template.HomeLayout.helpers({
     leaderboards() {
-        return Leaderboards.find({userId: Meteor.userId()});
+        return Leaderboards.find();
     },
 });
 

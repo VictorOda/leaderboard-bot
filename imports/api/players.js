@@ -4,6 +4,13 @@ import { check } from 'meteor/check';
 
 export const Players = new Mongo.Collection('players');
 
+if (Meteor.isServer) {
+    // This code only runs on the server
+    Meteor.publish('players', function() {
+        return Players.find({userId: this.userId}, {sort: {score: -1}});
+    });
+}
+
 Meteor.methods({
     'players.insert'(name, leaderboardId) {
         check(name, String);
@@ -18,6 +25,7 @@ Meteor.methods({
             name,
             score: 0,
             leaderboard: leaderboardId, // Leaderboard of the player
+            userId: this.userId, // Id of user
         });
     },
     'players.remove'(playerId) {
