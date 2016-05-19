@@ -77,11 +77,7 @@ Template.body.events({
         const title = target.text.value;
 
         // Insert a leaderboard into the collection
-        Leaderboards.insert({
-            title,
-            createdAt: new Date(), // current time
-            userId: Meteor.userId()
-        });
+        Meteor.call('leaderboards.insert', title);
 
         // Clear form
         target.text.value = '';
@@ -99,11 +95,7 @@ Template.leaderboard.events({
         const name = target.text.value;
 
         // Insert a player into a leaderboard
-        Players.insert({
-            name,
-            score: 0,
-            leaderboard: this._id, // Leaderboard of the player
-        });
+        Meteor.call('players.insert', name, this._id);
 
         // Clear form
         target.text.value = '';
@@ -123,7 +115,7 @@ Template.leaderboard.events({
         }
 
         // Update score
-        Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: -points}});
+        Meteor.call('players.addScore', Session.get('selectedPlayer-' + this._id), -points);
     },
     'click #plus'(e) {
         e.preventDefault();
@@ -138,12 +130,12 @@ Template.leaderboard.events({
         }
 
         // Update score
-        Players.update(Session.get('selectedPlayer-' + this._id), {$inc: {score: points}});
+        Meteor.call('players.addScore', Session.get('selectedPlayer-' + this._id), points);
     },
     'click #remove'(e) {
         e.preventDefault();
         const player = Players.findOne(Session.get('selectedPlayer-' + this._id)); // Get player
-        Players.remove(Session.get('selectedPlayer-' + this._id)); // Remove player
+        Meteor.call('players.remove',Session.get('selectedPlayer-' + this._id));
 
         Bert.alert('Player \'' + player.name + '\' removed!', 'success', 'fixed-top', 'fa-check');
         // De-select player
@@ -167,7 +159,7 @@ Template.leaderboard.events({
 
         const leaderboard = Leaderboards.findOne(this._id);
         Bert.alert('Leaderboard \'' + leaderboard.title + '\' deleted!', 'success', 'fixed-top', 'fa-check');
-        Leaderboards.remove(this._id);
+        Meteor.call('leaderboards.remove', this._id); // Remove leaderboard
 
         $('#' + this._id).closeModal();
     },
