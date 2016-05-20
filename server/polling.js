@@ -28,21 +28,20 @@ TelegramBot.parsePollResult = function(data) {
     data.map(item => {
         if (TelegramBot.getUpdatesOffset != item.update_id) {
             TelegramBot.getUpdatesOffset = item.update_id;
-            console.log(item);
+            // console.log(item);
             const message = item.message;
             const type = Object.keys(message).pop();
             const from = item.message.from.username;
 
-            console.log("text = " + message.text);
+            // console.log("text = " + message.text);
 
             if (message.reply_to_message) {
                 console.log("reply_to_message = " + message.reply_to_message.text);
             }
 
-            console.log('TYPE: ' + type + '; TYPEOF: ' + typeof(TelegramBot.triggers.text));
             if((type === 'text' || type === 'entities') && typeof(TelegramBot.triggers.text) !== 'undefined') {
-                var msg = "";
-                var obj;
+                let msg = "";
+                let obj;
 
                 if (message.reply_to_message) {
                   msg = TelegramBot.parseCommandString(item.message.reply_to_message.text);
@@ -50,15 +49,14 @@ TelegramBot.parsePollResult = function(data) {
                   msg = TelegramBot.parseCommandString(item.message.text);
                 }
 
-                console.log("entered if. msg[0] = " + msg[0]);
+                // console.log("entered if. msg[0] = " + msg[0]);
 
-                var index = TelegramBot.replyQueue.indexOf(message.chat.id);
+                const index = TelegramBot.replyQueue.indexOf(message.chat.id);
 
                 //Check if a custom reply is running for the current chat
                 if (index > -1) {
 
                   // console.log("entrou custom reply, msg[0] = " + msg[0]);
-                  //
                   // console.log(TelegramBot.replyQueue);
                   // console.log(TelegramBot.replyStopListeners[message.chat.id]);
                   // console.log(TelegramBot.replyStopListeners[message.chat.id]);
@@ -78,11 +76,11 @@ TelegramBot.parsePollResult = function(data) {
                 }
 
                 if(obj) {
-                    console.log("Entered send");
+                    // console.log("Entered send");
                     obj.callback(msg, from, message);
                 }
             } else {
-                console.log("Entered else");
+                // console.log("Entered else");
                 if(typeof(TelegramBot.triggers[type]) !== 'undefined') {
                     TelegramBot.triggers[type].map(trigger => {
                         trigger.callback('N/A', from, message);
@@ -90,7 +88,7 @@ TelegramBot.parsePollResult = function(data) {
                 }
             }
         }
-        console.log(TelegramBot.getUpdatesOffset);
+        // console.log(TelegramBot.getUpdatesOffset);
     });
 };
 

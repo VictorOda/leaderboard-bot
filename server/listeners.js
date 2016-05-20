@@ -1,4 +1,8 @@
 import { Meteor } from 'meteor/meteor';
+import { Accounts } from 'meteor/accounts-base';
+
+import { Leaderboards } from '../imports/api/leaderboards.js';
+import { Players } from '../imports/api/players.js';
 
 Meteor.startup(function () {
     // set our token
@@ -10,11 +14,56 @@ Meteor.startup(function () {
 
 TelegramBot.addListener('/start', function(command, from, message) {
 
-    var chatId = message.chat.id;
+    const chatId = message.chat.id;
+
     TelegramBot.method('sendMessage', {
         chat_id: chatId,
         text: "Bot has been started! For help type /help. " +
-                "In order to create a leaderboard"
+                "In order to use this bot you must create an account at <website>. " +
+                "After that use the /setAccount command to set your account to this chat."
+    });
+    return;
+});
+
+//----------------------------------------------------------------------------//
+
+TelegramBot.addListener('/setAccount', function(command, from, message) {
+
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
+    if(words.length != 3) {
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "You must insert your email and password!\n" +
+                    "Command: /setAccount <email> <password>"
+        });
+        return;
+    }
+
+    const email = words[1];
+    const password = words[2];
+    const user = Accounts.findUserByEmail(email);
+
+    const result = Accounts._checkPassword(user, password);
+    if(result.error !== null) {
+        // Success
+        // Creat profile and set the chatId
+        const data = {
+            chatId
+        };
+        Meteor.users.update(user._id, {$set: {profile: data}});
+    } else {
+        // Failure
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "No user account was found with this email and password!"
+        });
+        return;
+    }
+
+    TelegramBot.method('sendMessage', {
+        chat_id: chatId,
+        text: "Your account has been set to this chat!"
     });
     return;
 });
@@ -22,9 +71,10 @@ TelegramBot.addListener('/start', function(command, from, message) {
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/help', function(command, from , message) {
-    var chatId = message.chat.id;
-    var msg = "I have the following commands loaded:\n" +
+    const chatId = message.chat.id;
+    const msg = "I have the following commands loaded:\n" +
                 "- /start\n" +
+                "- /setAccount <email> <password>\n" +
                 "- /createLeaderboard <leaderboardName>\n" +
                 "- /listLeaderboards\n" +
                 "- /showLeaderboard <leaderboardName>\n" +
@@ -42,8 +92,8 @@ TelegramBot.addListener('/help', function(command, from , message) {
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
-    var chatId = message.chat.id;
-    var words = message.text.split(" ");
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
     if(words.length != 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
@@ -53,26 +103,37 @@ TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
         return;
     }
 
-    var leaderboard = words[1];
-
-    // Chack if leaderboard already exist
-    if(Leaderboards.findOne({name: leaderboard, chatId: chatId})) {
+    const title = words[1];
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
-            text: "Leaderboard \"" + leaderboar + "\" already exists!"
+            text: "You must set an account to this chat using /setAccount."
         });
         return;
+    } else {
+        // Check if leaderboard already exist
+        if(Leaderboards.findOne({title, chatId})) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "Leaderboard \"" + leaderboar + "\" already exists!"
+            });
+            return;
+        }
+
+        // Insert leaderboard
+        Leaderboards.insert({
+            title,
+            createdAt: new Date(), // current time
+            userId: user._id
+        });
     }
 
-    // Insert leaderboard
-    Leaderboards.insert({
-        name: leaderboard,
-        chatId: chatId
-    });
-
+    // Success
     TelegramBot.method('sendMessage', {
         chat_id: chatId,
-        text: "Leaderboard " + leaderboard + " created."
+        text: "Leaderboard " + title + " created."
     });
     return;
 });
@@ -80,8 +141,8 @@ TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/listLeaderboards', function(command, from, message) {
-    var chatId = message.chat.id;
-    var words = message.text.split(" ");
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
     if(words.length > 1) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
@@ -91,25 +152,35 @@ TelegramBot.addListener('/listLeaderboards', function(command, from, message) {
         return;
     }
 
-    // Find leaderboard
-    var leaderboards = Leaderboards.find({"chatId": chatId}, {sort: {name: 1}});
-    var leaderboardNames = "LEADERBOARDS \n";
-    leaderboards.map(function (leaderboard) {
-        leaderboardNames += "\n" + leaderboard.name;
-    });
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "You must set an account to this chat using /setAccount."
+        });
+        return;
+    } else {
+        // Find leaderboard
+        const leaderboards = Leaderboards.find({userId: user._id});
+        let leaderboardNames = "LEADERBOARDS \n";
+        leaderboards.map(function (leaderboard) {
+            leaderboardNames += "\n" + leaderboard.title;
+        });
 
-    TelegramBot.method('sendMessage', {
-        chat_id: chatId,
-        text: leaderboardNames
-    });
-    return;
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: leaderboardNames
+        });
+        return;
+    }
 });
 
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
-    var chatId = message.chat.id;
-    var words = message.text.split(" ");
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
     if(words.length != 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
@@ -119,7 +190,7 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
         return;
     }
 
-    var leaderboardName = words[1];
+    const leaderboardName = words[1];
 
     // Check if leaderboard exists
     if(!Leaderboards.findOne({name: leaderboardName, chatId: chatId})) {
@@ -131,8 +202,8 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
     }
 
     // Print players of the leaderboard and their scores
-    var leaderboard = "LEADERBOARD: " + leaderboardName + "\n" + "\nPLAYER NAME -> SCORE";
-    var players = Players.find({
+    let leaderboard = "LEADERBOARD: " + leaderboardName + "\n" + "\nPLAYER NAME -> SCORE";
+    const players = Players.find({
         leaderboardName: leaderboardName,
         chatId: chatId
     });
@@ -150,8 +221,8 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/addPlayer', function(command, from, message) {
-    var chatId = message.chat.id;
-    var words = message.text.split(" ");
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
     if(words.length != 3) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
@@ -161,8 +232,8 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
         return;
     }
 
-    var leaderboardName = words[1];
-    var playerName = words[2];
+    const leaderboardName = words[1];
+    const playerName = words[2];
 
     // Check if leaderboard exists
     if(!Leaderboards.findOne({name: leaderboardName, chatId: chatId})) {
@@ -199,8 +270,8 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
 //----------------------------------------------------------------------------//
 
 TelegramBot.addListener('/increasePlayerScore', function(command, from, message) {
-    var chatId = message.chat.id;
-    var words = message.text.split(" ");
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
     if(words.length != 4) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
@@ -210,9 +281,9 @@ TelegramBot.addListener('/increasePlayerScore', function(command, from, message)
         return;
     }
 
-    var leaderboardName = words[1];
-    var playerName = words[2];
-    var score = parseInt(words[3]);
+    const leaderboardName = words[1];
+    const playerName = words[2];
+    const score = parseInt(words[3]);
 
     // Check if leaderboard exists
     if(!Leaderboards.findOne({name: leaderboardName, chatId: chatId})) {
