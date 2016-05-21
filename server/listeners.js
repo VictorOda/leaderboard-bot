@@ -79,6 +79,7 @@ TelegramBot.addListener('/help', function(command, from , message) {
                 "- /listLeaderboards\n" +
                 "- /showLeaderboard <leaderboardName>\n" +
                 "- /addPlayer <leaderboardName> <playerName>\n" +
+                "- /removePlayer <leaderboardName> <playerName>\n" +
                 "- /increasePlayerScore <leaderboardName> <playerName> <score>" +
                 " - The score can be positive or negative.";
 
@@ -287,6 +288,63 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
     TelegramBot.method('sendMessage', {
         chat_id: chatId,
         text: "Player \"" + playerName + "\" was added with success!"
+    });
+    return;
+});
+
+//----------------------------------------------------------------------------//
+
+TelegramBot.addListener('/removePlayer', function(command, from, message) {
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
+    if(words.length != 3) {
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "Only one player can be removed at a time! \n" +
+                    "Command: /removePlayer <leaderboardName> <playerName>"
+        });
+        return;
+    }
+
+    const leaderboardName = words[1];
+    const playerName = words[2];
+
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "You must set an account to this chat using /setAccount."
+        });
+        return;
+    } else {
+        // Check if leaderboard exists
+        const leaderboard = Leaderboards.findOne({title: leaderboardName, userId: user._id});
+        if(!leaderboard) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "The leaderboard \"" + leaderboardName + "\" does not exist!"
+            });
+            return;
+        }
+
+        // Check if player exists
+        const player = Players.findOne({name: playerName, leaderboard: leaderboard._id, userId: user._id});
+        if(!player) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "There is no player named \"" + playerName + "\" on this leaderboard!"
+            });
+            return;
+        }
+
+        // Remove player
+        Players.remove(player._id);
+    }
+
+    TelegramBot.method('sendMessage', {
+        chat_id: chatId,
+        text: "Player \"" + playerName + "\" was removed with success!"
     });
     return;
 });
