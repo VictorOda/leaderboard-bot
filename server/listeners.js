@@ -190,31 +190,43 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
         return;
     }
 
-    const leaderboardName = words[1];
-
-    // Check if leaderboard exists
-    if(!Leaderboards.findOne({name: leaderboardName, chatId: chatId})) {
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
-            text: "The leaderboard \"" + leaderboardName + "\" does not exist!"
+            text: "You must set an account to this chat using /setAccount."
         });
         return;
+    } else {
+        // Get the name of the leaderboard
+        const leaderboardName = words[1];
+        const leaderboard = Leaderboards.findOne({title: leaderboardName, userId: user._id});
+
+        // Check if leaderboard exists
+        if(!leaderboard) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "The leaderboard \"" + leaderboardName + "\" does not exist!"
+            });
+            return;
+        }
+
+        // Print players of the leaderboard and their scores
+        let leaderboardPlayers = "LEADERBOARD: " + leaderboardName + "\n" + "\nPLAYER NAME -> SCORE";
+        const players = Players.find({
+            leaderboard: leaderboard._id,
+            userId: user._id
+        }, {sort: {score: -1}});
+        players.map(function (player) {
+            leaderboardPlayers += "\n" + player.name + " -> " + player.score;
+        });
+
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: leaderboardPlayers
+        });
     }
-
-    // Print players of the leaderboard and their scores
-    let leaderboard = "LEADERBOARD: " + leaderboardName + "\n" + "\nPLAYER NAME -> SCORE";
-    const players = Players.find({
-        leaderboardName: leaderboardName,
-        chatId: chatId
-    });
-    players.map(function (player) {
-        leaderboard += "\n" + player.name + " -> " + player.score;
-    });
-
-    TelegramBot.method('sendMessage', {
-        chat_id: chatId,
-        text: leaderboard
-    });
     return;
 });
 
