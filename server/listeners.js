@@ -247,30 +247,42 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
     const leaderboardName = words[1];
     const playerName = words[2];
 
-    // Check if leaderboard exists
-    if(!Leaderboards.findOne({name: leaderboardName, chatId: chatId})) {
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
-            text: "The leaderboard \"" + leaderboardName + "\" does not exist!"
+            text: "You must set an account to this chat using /setAccount."
         });
         return;
-    }
-    // Check if player exists
-    if(Players.findOne({name: playerName, leaderboardName: leaderboardName, chatId: chatId})) {
-        TelegramBot.method('sendMessage', {
-            chat_id: chatId,
-            text: "A player named \"" + playerName + "\" is already on this leaderboard!"
-        });
-        return;
-    }
+    } else {
+        // Check if leaderboard exists
+        const leaderboard = Leaderboards.findOne({title: leaderboardName, userId: user._id});
+        if(!leaderboard) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "The leaderboard \"" + leaderboardName + "\" does not exist!"
+            });
+            return;
+        }
 
-    // Insert player
-    Players.insert({
-        name: playerName,
-        score: 0,
-        leaderboardName: leaderboardName,
-        chatId: chatId
-    });
+        // Check if player exists
+        if(Players.findOne({name: playerName, leaderboard: leaderboard._id, userId: user._id})) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "A player named \"" + playerName + "\" is already on this leaderboard!"
+            });
+            return;
+        }
+
+        // Insert player
+        Players.insert({
+            name: playerName,
+            score: 0,
+            leaderboard: leaderboard._id,
+            userId: user._id
+        });
+    }
 
     TelegramBot.method('sendMessage', {
         chat_id: chatId,
