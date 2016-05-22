@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
+import { check } from 'meteor/check';
 
 import { Leaderboards } from '../imports/api/leaderboards.js';
 import { Players } from '../imports/api/players.js';
@@ -392,6 +393,15 @@ TelegramBot.addListener('/increasePlayerScore', function(command, from, message)
     const playerName = words[1].substring(1);
     // Get score
     const score = parseInt(words[2].substring(1));
+    try {
+        check(score, Match.Integer);
+    } catch (err) {
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "The score must be a number with or without the minus sign."
+        });
+        return;
+    }
 
     const user = Meteor.users.findOne({'profile.chatId': chatId});
     if(!user._id) {
