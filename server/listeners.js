@@ -95,7 +95,7 @@ TelegramBot.addListener('/help', function(command, from , message) {
 TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
     const chatId = message.chat.id;
     const words = message.text.split(" ");
-    if(words.length != 2) {
+    if(words.length < 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one leaderboard can be created at a time!\n" +
@@ -104,7 +104,11 @@ TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
         return;
     }
 
-    const title = words[1];
+    let title = words[1];
+    for(i = 2; i <= words.length - 1; i++) {
+        title += ' ' + words[i];
+    }
+
     const user = Meteor.users.findOne({'profile.chatId': chatId});
     if(!user._id) {
         // No user found
@@ -182,7 +186,7 @@ TelegramBot.addListener('/listLeaderboards', function(command, from, message) {
 TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
     const chatId = message.chat.id;
     const words = message.text.split(" ");
-    if(words.length != 2) {
+    if(words.length < 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one leaderboard can be shown at once\n" +
@@ -201,7 +205,10 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
         return;
     } else {
         // Get the name of the leaderboard
-        const leaderboardName = words[1];
+        let leaderboardName = words[1];
+        for(i = 2; i <= words.length - 1; i++) {
+            leaderboardName += ' ' + words[i];
+        }
         const leaderboard = Leaderboards.findOne({title: leaderboardName, userId: user._id});
 
         // Check if leaderboard exists
@@ -235,18 +242,24 @@ TelegramBot.addListener('/showLeaderboard', function(command, from, message) {
 
 TelegramBot.addListener('/addPlayer', function(command, from, message) {
     const chatId = message.chat.id;
-    const words = message.text.split(" ");
-    if(words.length != 3) {
+    const words = message.text.split(";");
+    if(words.length < 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one player can be added at a time! \n" +
-                    "Command: /addPlayer <leaderboardName> <playerName>"
+                    "Command: /addPlayer <leaderboardName;> <playerName;>"
         });
         return;
     }
 
-    const leaderboardName = words[1];
-    const playerName = words[2];
+    // Get leaderboard name
+    const firstPart = words[0].split(" ");
+    let leaderboardName = firstPart[1];
+    for(i = 2; i <= firstPart.length - 1; i++) {
+        leaderboardName += ' ' + firstPart[i];
+    }
+    // Get player name
+    const playerName = words[1].substring(1);
 
     const user = Meteor.users.findOne({'profile.chatId': chatId});
     if(!user._id) {
@@ -296,18 +309,24 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
 
 TelegramBot.addListener('/removePlayer', function(command, from, message) {
     const chatId = message.chat.id;
-    const words = message.text.split(" ");
-    if(words.length != 3) {
+    const words = message.text.split(";");
+    if(words.length < 2) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one player can be removed at a time! \n" +
-                    "Command: /removePlayer <leaderboardName> <playerName>"
+                    "Command: /removePlayer <leaderboardName;> <playerName;>"
         });
         return;
     }
 
-    const leaderboardName = words[1];
-    const playerName = words[2];
+    // Get leaderboard name
+    const firstPart = words[0].split(" ");
+    let leaderboardName = firstPart[1];
+    for(i = 2; i <= firstPart.length - 1; i++) {
+        leaderboardName += ' ' + firstPart[i];
+    }
+    // Get player name
+    const playerName = words[1].substring(1);
 
     const user = Meteor.users.findOne({'profile.chatId': chatId});
     if(!user._id) {
@@ -353,19 +372,26 @@ TelegramBot.addListener('/removePlayer', function(command, from, message) {
 
 TelegramBot.addListener('/increasePlayerScore', function(command, from, message) {
     const chatId = message.chat.id;
-    const words = message.text.split(" ");
-    if(words.length != 4) {
+    const words = message.text.split(";");
+    if(words.length < 3) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Wrong input! \n" +
-                    "Command: /addPlayer <leaderboardName> <playerName> <score>"
+                    "Command: /increasePlayerScore <leaderboardName;> <playerName;> <score;>"
         });
         return;
     }
 
-    const leaderboardName = words[1];
-    const playerName = words[2];
-    const score = parseInt(words[3]);
+    // Get leaderboard name
+    const firstPart = words[0].split(" ");
+    let leaderboardName = firstPart[1];
+    for(i = 2; i <= firstPart.length - 1; i++) {
+        leaderboardName += ' ' + firstPart[i];
+    }
+    // Get player name
+    const playerName = words[1].substring(1);
+    // Get score
+    const score = parseInt(words[2].substring(1));
 
     const user = Meteor.users.findOne({'profile.chatId': chatId});
     if(!user._id) {
