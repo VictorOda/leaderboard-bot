@@ -77,11 +77,12 @@ TelegramBot.addListener('/help', function(command, from , message) {
                 "- /start\n" +
                 "- /setAccount <email> <password>\n" +
                 "- /createLeaderboard <leaderboardName>\n" +
+                "- /deleteLeaderboard <leaderboardName>\n" +
                 "- /listLeaderboards\n" +
                 "- /showLeaderboard <leaderboardName>\n" +
-                "- /addPlayer <leaderboardName> <playerName>\n" +
-                "- /removePlayer <leaderboardName> <playerName>\n" +
-                "- /increasePlayerScore <leaderboardName> <playerName> <score>" +
+                "- /addPlayer <leaderboardName>; <playerName>;\n" +
+                "- /removePlayer <leaderboardName>; <playerName>;\n" +
+                "- /increasePlayerScore <leaderboardName>; <playerName>; <score>;" +
                 " - The score can be positive or negative.";
 
     TelegramBot.method('sendMessage', {
@@ -120,10 +121,10 @@ TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
         return;
     } else {
         // Check if leaderboard already exist
-        if(Leaderboards.findOne({title, chatId})) {
+        if(Leaderboards.findOne({title, userId: user._id})) {
             TelegramBot.method('sendMessage', {
                 chat_id: chatId,
-                text: "Leaderboard \"" + leaderboar + "\" already exists!"
+                text: "Leaderboard \"" + title + "\" already exists!"
             });
             return;
         }
@@ -140,6 +141,57 @@ TelegramBot.addListener('/createLeaderboard', function(command, from, message) {
     TelegramBot.method('sendMessage', {
         chat_id: chatId,
         text: "Leaderboard " + title + " created."
+    });
+    return;
+});
+
+//----------------------------------------------------------------------------//
+
+TelegramBot.addListener('/deleteLeaderboard', function(command, from, message) {
+    const chatId = message.chat.id;
+    const words = message.text.split(" ");
+    if(words.length < 2) {
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "Only one leaderboard can be deleted at a time!\n" +
+                    "Command: /deleteLeaderboard <leaderboardName>"
+        });
+        return;
+    }
+
+    let title = words[1];
+    for(i = 2; i <= words.length - 1; i++) {
+        title += ' ' + words[i];
+    }
+
+    const user = Meteor.users.findOne({'profile.chatId': chatId});
+    if(!user._id) {
+        // No user found
+        TelegramBot.method('sendMessage', {
+            chat_id: chatId,
+            text: "You must set an account to this chat using /setAccount."
+        });
+        return;
+    } else {
+        // Check if leaderboard already exist
+        const leaderboard = Leaderboards.findOne({title, userId: user._id});
+        console.log(leaderboard);
+        if(!leaderboard) {
+            TelegramBot.method('sendMessage', {
+                chat_id: chatId,
+                text: "Leaderboard \"" + title + "\" does not exists!"
+            });
+            return;
+        }
+
+        // Remove leaderboard
+        Leaderboards.remove(leaderboard._id);
+    }
+
+    // Success
+    TelegramBot.method('sendMessage', {
+        chat_id: chatId,
+        text: "Leaderboard " + title + " deleted."
     });
     return;
 });
@@ -248,7 +300,7 @@ TelegramBot.addListener('/addPlayer', function(command, from, message) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one player can be added at a time! \n" +
-                    "Command: /addPlayer <leaderboardName;> <playerName;>"
+                    "Command: /addPlayer <leaderboardName>; <playerName>;"
         });
         return;
     }
@@ -315,7 +367,7 @@ TelegramBot.addListener('/removePlayer', function(command, from, message) {
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Only one player can be removed at a time! \n" +
-                    "Command: /removePlayer <leaderboardName;> <playerName;>"
+                    "Command: /removePlayer <leaderboardName>; <playerName>;"
         });
         return;
     }
@@ -378,7 +430,7 @@ TelegramBot.addListener('/increasePlayerScore', function(command, from, message)
         TelegramBot.method('sendMessage', {
             chat_id: chatId,
             text: "Wrong input! \n" +
-                    "Command: /increasePlayerScore <leaderboardName;> <playerName;> <score;>"
+                    "Command: /increasePlayerScore <leaderboardName>; <playerName>; <score>;"
         });
         return;
     }
